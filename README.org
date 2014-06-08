@@ -1,0 +1,11 @@
+* SHA-1 implementation in C++
+
+** License
+
+100% Public Domain
+
+** Authors
+
+- Steve Reid (Original C Code)
+- [[http://untroubled.org/][Bruce Guenter]] (Small changes to fit into bglibs)
+- [[https://njh.eu/][Volker Grabsch]] (Translation to simpler C++ Code)

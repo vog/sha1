@@ -1,12 +1,12 @@
 /*
     sha1.hpp - header of
- 
+
     ============
     SHA-1 in C++
     ============
- 
+
     100% Public Domain.
- 
+
     Original C Code
         -- Steve Reid <steve@edmweb.com>
     Small changes to fit into bglibs
@@ -35,12 +35,9 @@ public:
     static std::string from_file(const std::string &filename);
 
 private:
-    typedef unsigned long int uint32;   /* just needs to be at least 32bit */
-    typedef unsigned long long uint64;  /* just needs to be at least 64bit */
-
-    static const uint DIGEST_INTS = 5;  /* number of 32bit integers per SHA1 digest */
-    static const uint BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
-    static const uint BLOCK_BYTES = BLOCK_INTS * 4;
+    static const unsigned int DIGEST_INTS = 5;  /* number of 32bit integers per SHA1 digest */
+    static const unsigned int BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
+    static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;
 
     uint32 digest[DIGEST_INTS];
     std::string buffer;

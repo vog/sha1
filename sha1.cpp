@@ -13,6 +13,8 @@
         -- Bruce Guenter <bruce@untroubled.org>
     Translation to simpler C++ Code
         -- Volker Grabsch <vog@notjusthosting.com>
+    Safety fixes
+        -- Eugene Hopkinson <slowriot at voxelstorm dot com>
 */
 
 #include "sha1.hpp"
@@ -241,7 +243,7 @@ void SHA1::transform(uint32 block[BLOCK_BYTES])
 }
 
 
-void SHA1::buffer_to_block(const std::string &buffer, uint32 block[BLOCK_BYTES])
+void SHA1::buffer_to_block(const std::string &buffer, uint32 block[BLOCK_INTS])
 {
     /* Convert the std::string (byte buffer) to a uint32 array (MSB) */
     for (uint i = 0; i < BLOCK_INTS; i++)
@@ -254,7 +256,7 @@ void SHA1::buffer_to_block(const std::string &buffer, uint32 block[BLOCK_BYTES])
 }
 
 
-void SHA1::read(std::istream &is, std::string &s, int max)
+void SHA1::read(std::istream &is, std::string &s, size_t max)
 {
     char sbuf[max];
     is.read(sbuf, max);

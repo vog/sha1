@@ -232,18 +232,19 @@ void SHA1::update(const std::string &s)
 
 void SHA1::update(std::istream &is)
 {
-    char sbuf[BLOCK_BYTES];
-    is.read(sbuf, BLOCK_BYTES - buffer.size());
-    buffer.append(sbuf, is.gcount());
-
-    while (buffer.size() == BLOCK_BYTES)
+    while (true)
     {
+        char sbuf[BLOCK_BYTES];
+        is.read(sbuf, BLOCK_BYTES - buffer.size());
+        buffer.append(sbuf, is.gcount());
+        if (buffer.size() != BLOCK_BYTES)
+        {
+            return;
+        }
         uint32_t block[BLOCK_INTS];
         buffer_to_block(buffer, block);
         transform(digest, block, transforms);
-        char sbuf[BLOCK_BYTES];
-        is.read(sbuf, BLOCK_BYTES);
-        buffer.assign(sbuf, is.gcount());
+        buffer.clear();
     }
 }
 

@@ -23,6 +23,10 @@
 #include <fstream>
 
 
+static const unsigned int BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
+static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;
+
+
 SHA1::SHA1()
 {
     reset();

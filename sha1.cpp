@@ -23,8 +23,8 @@
 #include <fstream>
 
 
-static const unsigned int BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
-static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;
+static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
+static const size_t BLOCK_BYTES = BLOCK_INTS * 4;
 
 
 static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
@@ -207,7 +207,7 @@ static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &t
 static void buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS])
 {
     /* Convert the std::string (byte buffer) to a uint32_t array (MSB) */
-    for (unsigned int i = 0; i < BLOCK_INTS; i++)
+    for (size_t i = 0; i < BLOCK_INTS; i++)
     {
         block[i] = (buffer[4*i+3] & 0xff)
                    | (buffer[4*i+2] & 0xff)<<8
@@ -265,7 +265,7 @@ std::string SHA1::final()
 
     /* Padding */
     buffer += 0x80;
-    unsigned int orig_size = buffer.size();
+    size_t orig_size = buffer.size();
     while (buffer.size() < BLOCK_BYTES)
     {
         buffer += (char)0x00;
@@ -277,7 +277,7 @@ std::string SHA1::final()
     if (orig_size > BLOCK_BYTES - 8)
     {
         transform(digest, block, transforms);
-        for (unsigned int i = 0; i < BLOCK_INTS - 2; i++)
+        for (size_t i = 0; i < BLOCK_INTS - 2; i++)
         {
             block[i] = 0;
         }
@@ -290,7 +290,7 @@ std::string SHA1::final()
 
     /* Hex std::string */
     std::ostringstream result;
-    for (unsigned int i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
+    for (size_t i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
     {
         result << std::hex << std::setfill('0') << std::setw(8);
         result << (digest[i] & 0xffffffff);

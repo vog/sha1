@@ -39,12 +39,6 @@ private:
     uint32_t digest[5];
     std::string buffer;
     uint64_t transforms;
-
-    static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms);
-    static void transform(uint32_t digest[], uint32_t block[], uint64_t &transforms);
-
-    static void buffer_to_block(const std::string &buffer, uint32_t block[]);
-    static void read(std::istream &is, std::string &s, size_t max);
 };
 
 

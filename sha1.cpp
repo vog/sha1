@@ -27,7 +27,7 @@ static const unsigned int BLOCK_INTS = 16;  /* number of 32bit integers per SHA1
 static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;
 
 
-void SHA1::reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
+static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
 {
     /* SHA1 initialization constants */
     digest[0] = 0x67452301;
@@ -46,7 +46,7 @@ void SHA1::reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
  * Hash a single 512-bit block. This is the core of the algorithm.
  */
 
-void SHA1::transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &transforms)
+static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &transforms)
 {
     /* Copy digest[] to working vars */
     uint32_t a = digest[0];
@@ -160,7 +160,7 @@ void SHA1::transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &tr
 }
 
 
-void SHA1::buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS])
+static void buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS])
 {
     /* Convert the std::string (byte buffer) to a uint32_t array (MSB) */
     for (unsigned int i = 0; i < BLOCK_INTS; i++)
@@ -173,7 +173,7 @@ void SHA1::buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS]
 }
 
 
-void SHA1::read(std::istream &is, std::string &s, size_t max)
+static void read(std::istream &is, std::string &s, size_t max)
 {
     char sbuf[max];
     is.read(sbuf, max);

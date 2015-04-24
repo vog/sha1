@@ -29,7 +29,7 @@ static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;
 
 SHA1::SHA1()
 {
-    reset();
+    reset(digest, buffer, transforms);
 }
 
 
@@ -99,7 +99,7 @@ std::string SHA1::final()
     }
 
     /* Reset for next run */
-    reset();
+    reset(digest, buffer, transforms);
 
     return result.str();
 }
@@ -114,7 +114,7 @@ std::string SHA1::from_file(const std::string &filename)
 }
 
 
-void SHA1::reset()
+void SHA1::reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
 {
     /* SHA1 initialization constants */
     digest[0] = 0x67452301;

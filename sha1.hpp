@@ -40,7 +40,7 @@ private:
     std::string buffer;
     uint64_t transforms;
 
-    void reset();
+    static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms);
     void transform(uint32_t block[]);
 
     static void buffer_to_block(const std::string &buffer, uint32_t block[]);

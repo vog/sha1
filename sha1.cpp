@@ -288,7 +288,7 @@ std::string SHA1::final()
     for (size_t i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
     {
         result << std::hex << std::setfill('0') << std::setw(8);
-        result << (digest[i] & 0xffffffff);
+        result << digest[i];
     }
 
     /* Reset for next run */

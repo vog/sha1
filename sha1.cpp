@@ -129,7 +129,7 @@ void SHA1::reset()
  * Hash a single 512-bit block. This is the core of the algorithm.
  */
 
-void SHA1::transform(uint32_t block[BLOCK_BYTES])
+void SHA1::transform(uint32_t block[BLOCK_INTS])
 {
     /* Copy digest[] to working vars */
     uint32_t a = digest[0];

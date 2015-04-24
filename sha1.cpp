@@ -92,7 +92,7 @@ std::string SHA1::final()
 
     /* Hex std::string */
     std::ostringstream result;
-    for (unsigned int i = 0; i < DIGEST_INTS; i++)
+    for (unsigned int i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
     {
         result << std::hex << std::setfill('0') << std::setw(8);
         result << (digest[i] & 0xffffffff);

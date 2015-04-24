@@ -50,7 +50,7 @@ void SHA1::update(std::istream &is)
     {
         uint32_t block[BLOCK_INTS];
         buffer_to_block(buffer, block);
-        transform(block);
+        transform(digest, block, transforms);
         read(is, buffer, BLOCK_BYTES);
     }
 }
@@ -78,7 +78,7 @@ std::string SHA1::final()
 
     if (orig_size > BLOCK_BYTES - 8)
     {
-        transform(block);
+        transform(digest, block, transforms);
         for (unsigned int i = 0; i < BLOCK_INTS - 2; i++)
         {
             block[i] = 0;
@@ -88,7 +88,7 @@ std::string SHA1::final()
     /* Append total_bits, split this uint64_t into two uint32_t */
     block[BLOCK_INTS - 1] = total_bits;
     block[BLOCK_INTS - 2] = (total_bits >> 32);
-    transform(block);
+    transform(digest, block, transforms);
 
     /* Hex std::string */
     std::ostringstream result;
@@ -133,7 +133,7 @@ void SHA1::reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
  * Hash a single 512-bit block. This is the core of the algorithm.
  */
 
-void SHA1::transform(uint32_t block[BLOCK_INTS])
+void SHA1::transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &transforms)
 {
     /* Copy digest[] to working vars */
     uint32_t a = digest[0];

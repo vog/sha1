@@ -50,7 +50,7 @@ static uint32_t rol(const uint32_t value, const size_t bits)
 
 static uint32_t blk(const uint32_t block[BLOCK_INTS], const size_t i)
 {
-    return rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i&15], 1);
+    return rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i], 1);
 }
 
 
@@ -67,32 +67,32 @@ static void R0(const uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, 
 
 static void R1(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
-    block[i&15] = blk(block, i);
-    z += ((w&(x^y))^y) + block[i&15] + 0x5a827999 + rol(v, 5);
+    block[i] = blk(block, i);
+    z += ((w&(x^y))^y) + block[i] + 0x5a827999 + rol(v, 5);
     w = rol(w, 30);
 }
 
 
 static void R2(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
-    block[i&15] = blk(block, i);
-    z += (w^x^y) + block[i&15] + 0x6ed9eba1 + rol(v, 5);
+    block[i] = blk(block, i);
+    z += (w^x^y) + block[i] + 0x6ed9eba1 + rol(v, 5);
     w = rol(w, 30);
 }
 
 
 static void R3(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
-    block[i&15] = blk(block, i);
-    z += (((w|x)&y)|(w&x)) + block[i&15] + 0x8f1bbcdc + rol(v, 5);
+    block[i] = blk(block, i);
+    z += (((w|x)&y)|(w&x)) + block[i] + 0x8f1bbcdc + rol(v, 5);
     w = rol(w, 30);
 }
 
 
 static void R4(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
-    block[i&15] = blk(block, i);
-    z += (w^x^y) + block[i&15] + 0xca62c1d6 + rol(v, 5);
+    block[i] = blk(block, i);
+    z += (w^x^y) + block[i] + 0xca62c1d6 + rol(v, 5);
     w = rol(w, 30);
 }
 
@@ -127,70 +127,70 @@ static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &t
     R0(block, c, d, e, a, b, 13);
     R0(block, b, c, d, e, a, 14);
     R0(block, a, b, c, d, e, 15);
-    R1(block, e, a, b, c, d, 16);
-    R1(block, d, e, a, b, c, 17);
-    R1(block, c, d, e, a, b, 18);
-    R1(block, b, c, d, e, a, 19);
-    R2(block, a, b, c, d, e, 20);
-    R2(block, e, a, b, c, d, 21);
-    R2(block, d, e, a, b, c, 22);
-    R2(block, c, d, e, a, b, 23);
-    R2(block, b, c, d, e, a, 24);
-    R2(block, a, b, c, d, e, 25);
-    R2(block, e, a, b, c, d, 26);
-    R2(block, d, e, a, b, c, 27);
-    R2(block, c, d, e, a, b, 28);
-    R2(block, b, c, d, e, a, 29);
-    R2(block, a, b, c, d, e, 30);
-    R2(block, e, a, b, c, d, 31);
-    R2(block, d, e, a, b, c, 32);
-    R2(block, c, d, e, a, b, 33);
-    R2(block, b, c, d, e, a, 34);
-    R2(block, a, b, c, d, e, 35);
-    R2(block, e, a, b, c, d, 36);
-    R2(block, d, e, a, b, c, 37);
-    R2(block, c, d, e, a, b, 38);
-    R2(block, b, c, d, e, a, 39);
-    R3(block, a, b, c, d, e, 40);
-    R3(block, e, a, b, c, d, 41);
-    R3(block, d, e, a, b, c, 42);
-    R3(block, c, d, e, a, b, 43);
-    R3(block, b, c, d, e, a, 44);
-    R3(block, a, b, c, d, e, 45);
-    R3(block, e, a, b, c, d, 46);
-    R3(block, d, e, a, b, c, 47);
-    R3(block, c, d, e, a, b, 48);
-    R3(block, b, c, d, e, a, 49);
-    R3(block, a, b, c, d, e, 50);
-    R3(block, e, a, b, c, d, 51);
-    R3(block, d, e, a, b, c, 52);
-    R3(block, c, d, e, a, b, 53);
-    R3(block, b, c, d, e, a, 54);
-    R3(block, a, b, c, d, e, 55);
-    R3(block, e, a, b, c, d, 56);
-    R3(block, d, e, a, b, c, 57);
-    R3(block, c, d, e, a, b, 58);
-    R3(block, b, c, d, e, a, 59);
-    R4(block, a, b, c, d, e, 60);
-    R4(block, e, a, b, c, d, 61);
-    R4(block, d, e, a, b, c, 62);
-    R4(block, c, d, e, a, b, 63);
-    R4(block, b, c, d, e, a, 64);
-    R4(block, a, b, c, d, e, 65);
-    R4(block, e, a, b, c, d, 66);
-    R4(block, d, e, a, b, c, 67);
-    R4(block, c, d, e, a, b, 68);
-    R4(block, b, c, d, e, a, 69);
-    R4(block, a, b, c, d, e, 70);
-    R4(block, e, a, b, c, d, 71);
-    R4(block, d, e, a, b, c, 72);
-    R4(block, c, d, e, a, b, 73);
-    R4(block, b, c, d, e, a, 74);
-    R4(block, a, b, c, d, e, 75);
-    R4(block, e, a, b, c, d, 76);
-    R4(block, d, e, a, b, c, 77);
-    R4(block, c, d, e, a, b, 78);
-    R4(block, b, c, d, e, a, 79);
+    R1(block, e, a, b, c, d,  0);
+    R1(block, d, e, a, b, c,  1);
+    R1(block, c, d, e, a, b,  2);
+    R1(block, b, c, d, e, a,  3);
+    R2(block, a, b, c, d, e,  4);
+    R2(block, e, a, b, c, d,  5);
+    R2(block, d, e, a, b, c,  6);
+    R2(block, c, d, e, a, b,  7);
+    R2(block, b, c, d, e, a,  8);
+    R2(block, a, b, c, d, e,  9);
+    R2(block, e, a, b, c, d, 10);
+    R2(block, d, e, a, b, c, 11);
+    R2(block, c, d, e, a, b, 12);
+    R2(block, b, c, d, e, a, 13);
+    R2(block, a, b, c, d, e, 14);
+    R2(block, e, a, b, c, d, 15);
+    R2(block, d, e, a, b, c,  0);
+    R2(block, c, d, e, a, b,  1);
+    R2(block, b, c, d, e, a,  2);
+    R2(block, a, b, c, d, e,  3);
+    R2(block, e, a, b, c, d,  4);
+    R2(block, d, e, a, b, c,  5);
+    R2(block, c, d, e, a, b,  6);
+    R2(block, b, c, d, e, a,  7);
+    R3(block, a, b, c, d, e,  8);
+    R3(block, e, a, b, c, d,  9);
+    R3(block, d, e, a, b, c, 10);
+    R3(block, c, d, e, a, b, 11);
+    R3(block, b, c, d, e, a, 12);
+    R3(block, a, b, c, d, e, 13);
+    R3(block, e, a, b, c, d, 14);
+    R3(block, d, e, a, b, c, 15);
+    R3(block, c, d, e, a, b,  0);
+    R3(block, b, c, d, e, a,  1);
+    R3(block, a, b, c, d, e,  2);
+    R3(block, e, a, b, c, d,  3);
+    R3(block, d, e, a, b, c,  4);
+    R3(block, c, d, e, a, b,  5);
+    R3(block, b, c, d, e, a,  6);
+    R3(block, a, b, c, d, e,  7);
+    R3(block, e, a, b, c, d,  8);
+    R3(block, d, e, a, b, c,  9);
+    R3(block, c, d, e, a, b, 10);
+    R3(block, b, c, d, e, a, 11);
+    R4(block, a, b, c, d, e, 12);
+    R4(block, e, a, b, c, d, 13);
+    R4(block, d, e, a, b, c, 14);
+    R4(block, c, d, e, a, b, 15);
+    R4(block, b, c, d, e, a,  0);
+    R4(block, a, b, c, d, e,  1);
+    R4(block, e, a, b, c, d,  2);
+    R4(block, d, e, a, b, c,  3);
+    R4(block, c, d, e, a, b,  4);
+    R4(block, b, c, d, e, a,  5);
+    R4(block, a, b, c, d, e,  6);
+    R4(block, e, a, b, c, d,  7);
+    R4(block, d, e, a, b, c,  8);
+    R4(block, c, d, e, a, b,  9);
+    R4(block, b, c, d, e, a, 10);
+    R4(block, a, b, c, d, e, 11);
+    R4(block, e, a, b, c, d, 12);
+    R4(block, d, e, a, b, c, 13);
+    R4(block, c, d, e, a, b, 14);
+    R4(block, b, c, d, e, a, 15);
 
     /* Add the working vars back into digest[] */
     digest[0] += a;

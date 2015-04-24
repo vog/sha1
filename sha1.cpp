@@ -42,6 +42,19 @@ static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
 }
 
 
+static uint32_t rol(uint32_t value, size_t bits)
+{
+    return (value << bits) | (value >> (32 - bits));
+}
+
+
+static uint32_t blk(uint32_t block[BLOCK_INTS], size_t i)
+{
+    block[i&15] = rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i&15], 1);
+    return block[i&15];
+}
+
+
 /*
  * Hash a single 512-bit block. This is the core of the algorithm.
  */
@@ -55,16 +68,12 @@ static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &t
     uint32_t d = digest[3];
     uint32_t e = digest[4];
 
-    /* Help macros */
-#define rol(value, bits) (((value) << (bits)) | (((value) & 0xffffffff) >> (32 - (bits))))
-#define blk(i) (block[i&15] = rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i&15],1))
-
     /* (R0+R1), R2, R3, R4 are the different operations used in SHA1 */
-#define R0(v,w,x,y,z,i) z += ((w&(x^y))^y)     + block[i] + 0x5a827999 + rol(v,5); w=rol(w,30);
-#define R1(v,w,x,y,z,i) z += ((w&(x^y))^y)     + blk(i)   + 0x5a827999 + rol(v,5); w=rol(w,30);
-#define R2(v,w,x,y,z,i) z += (w^x^y)           + blk(i)   + 0x6ed9eba1 + rol(v,5); w=rol(w,30);
-#define R3(v,w,x,y,z,i) z += (((w|x)&y)|(w&x)) + blk(i)   + 0x8f1bbcdc + rol(v,5); w=rol(w,30);
-#define R4(v,w,x,y,z,i) z += (w^x^y)           + blk(i)   + 0xca62c1d6 + rol(v,5); w=rol(w,30);
+#define R0(v,w,x,y,z,i) z += ((w&(x^y))^y)     + block[i]      + 0x5a827999 + rol(v,5); w=rol(w,30);
+#define R1(v,w,x,y,z,i) z += ((w&(x^y))^y)     + blk(block, i) + 0x5a827999 + rol(v,5); w=rol(w,30);
+#define R2(v,w,x,y,z,i) z += (w^x^y)           + blk(block, i) + 0x6ed9eba1 + rol(v,5); w=rol(w,30);
+#define R3(v,w,x,y,z,i) z += (((w|x)&y)|(w&x)) + blk(block, i) + 0x8f1bbcdc + rol(v,5); w=rol(w,30);
+#define R4(v,w,x,y,z,i) z += (w^x^y)           + blk(block, i) + 0xca62c1d6 + rol(v,5); w=rol(w,30);
 
     /* 4 rounds of 20 operations each. Loop unrolled. */
     R0(a,b,c,d,e, 0);

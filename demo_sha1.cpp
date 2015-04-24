@@ -30,7 +30,7 @@ int main(int argc, const char *argv[])
     checksum.update(input);
     const string hash = checksum.final();
 
-    cout << "The SHA-1 is: " << hash << endl;
+    cout << "The SHA-1 of \"" << input << "\" is: " << hash << endl;
 
     return 0;
 }

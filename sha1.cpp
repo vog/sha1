@@ -124,8 +124,8 @@ void SHA1::reset()
     digest[4] = 0xc3d2e1f0;
 
     /* Reset counters */
-    transforms = 0;
     buffer = "";
+    transforms = 0;
 }
 
 

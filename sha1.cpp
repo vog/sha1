@@ -217,14 +217,6 @@ static void buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS
 }
 
 
-static void read(std::istream &is, std::string &s, size_t max)
-{
-    char sbuf[max];
-    is.read(sbuf, max);
-    s.assign(sbuf, is.gcount());
-}
-
-
 SHA1::SHA1()
 {
     reset(digest, buffer, transforms);
@@ -241,7 +233,9 @@ void SHA1::update(const std::string &s)
 void SHA1::update(std::istream &is)
 {
     std::string rest_of_buffer;
-    read(is, rest_of_buffer, BLOCK_BYTES - buffer.size());
+    char sbuf[BLOCK_BYTES - buffer.size()];
+    is.read(sbuf, BLOCK_BYTES - buffer.size());
+    rest_of_buffer.assign(sbuf, is.gcount());
     buffer += rest_of_buffer;
 
     while (buffer.size() == BLOCK_BYTES)
@@ -249,7 +243,9 @@ void SHA1::update(std::istream &is)
         uint32_t block[BLOCK_INTS];
         buffer_to_block(buffer, block);
         transform(digest, block, transforms);
-        read(is, buffer, BLOCK_BYTES);
+        char sbuf[BLOCK_BYTES];
+        is.read(sbuf, BLOCK_BYTES);
+        buffer.assign(sbuf, is.gcount());
     }
 }
 

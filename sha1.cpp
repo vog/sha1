@@ -50,8 +50,7 @@ static uint32_t rol(uint32_t value, size_t bits)
 
 static uint32_t blk(uint32_t block[BLOCK_INTS], size_t i)
 {
-    block[i&15] = rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i&15], 1);
-    return block[i&15];
+    return rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i&15], 1);
 }
 
 
@@ -68,28 +67,32 @@ static void R0(uint32_t block[BLOCK_INTS], uint32_t v, uint32_t &w, uint32_t x, 
 
 static void R1(uint32_t block[BLOCK_INTS], uint32_t v, uint32_t &w, uint32_t x, uint32_t y, uint32_t &z, size_t i)
 {
-    z += ((w&(x^y))^y) + blk(block, i) + 0x5a827999 + rol(v, 5);
+    block[i&15] = blk(block, i);
+    z += ((w&(x^y))^y) + block[i&15] + 0x5a827999 + rol(v, 5);
     w = rol(w, 30);
 }
 
 
 static void R2(uint32_t block[BLOCK_INTS], uint32_t v, uint32_t &w, uint32_t x, uint32_t y, uint32_t &z, size_t i)
 {
-    z += (w^x^y) + blk(block, i) + 0x6ed9eba1 + rol(v, 5);
+    block[i&15] = blk(block, i);
+    z += (w^x^y) + block[i&15] + 0x6ed9eba1 + rol(v, 5);
     w = rol(w, 30);
 }
 
 
 static void R3(uint32_t block[BLOCK_INTS], uint32_t v, uint32_t &w, uint32_t x, uint32_t y, uint32_t &z, size_t i)
 {
-    z += (((w|x)&y)|(w&x)) + blk(block, i) + 0x8f1bbcdc + rol(v, 5);
+    block[i&15] = blk(block, i);
+    z += (((w|x)&y)|(w&x)) + block[i&15] + 0x8f1bbcdc + rol(v, 5);
     w = rol(w, 30);
 }
 
 
 static void R4(uint32_t block[BLOCK_INTS], uint32_t v, uint32_t &w, uint32_t x, uint32_t y, uint32_t &z, size_t i)
 {
-    z += (w^x^y) + blk(block, i) + 0xca62c1d6 + rol(v, 5);
+    block[i&15] = blk(block, i);
+    z += (w^x^y) + block[i&15] + 0xca62c1d6 + rol(v, 5);
     w = rol(w, 30);
 }
 

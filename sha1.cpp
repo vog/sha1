@@ -27,93 +27,6 @@ static const unsigned int BLOCK_INTS = 16;  /* number of 32bit integers per SHA1
 static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;
 
 
-SHA1::SHA1()
-{
-    reset(digest, buffer, transforms);
-}
-
-
-void SHA1::update(const std::string &s)
-{
-    std::istringstream is(s);
-    update(is);
-}
-
-
-void SHA1::update(std::istream &is)
-{
-    std::string rest_of_buffer;
-    read(is, rest_of_buffer, BLOCK_BYTES - buffer.size());
-    buffer += rest_of_buffer;
-
-    while (is)
-    {
-        uint32_t block[BLOCK_INTS];
-        buffer_to_block(buffer, block);
-        transform(digest, block, transforms);
-        read(is, buffer, BLOCK_BYTES);
-    }
-}
-
-
-/*
- * Add padding and return the message digest.
- */
-
-std::string SHA1::final()
-{
-    /* Total number of hashed bits */
-    uint64_t total_bits = (transforms*BLOCK_BYTES + buffer.size()) * 8;
-
-    /* Padding */
-    buffer += 0x80;
-    unsigned int orig_size = buffer.size();
-    while (buffer.size() < BLOCK_BYTES)
-    {
-        buffer += (char)0x00;
-    }
-
-    uint32_t block[BLOCK_INTS];
-    buffer_to_block(buffer, block);
-
-    if (orig_size > BLOCK_BYTES - 8)
-    {
-        transform(digest, block, transforms);
-        for (unsigned int i = 0; i < BLOCK_INTS - 2; i++)
-        {
-            block[i] = 0;
-        }
-    }
-
-    /* Append total_bits, split this uint64_t into two uint32_t */
-    block[BLOCK_INTS - 1] = total_bits;
-    block[BLOCK_INTS - 2] = (total_bits >> 32);
-    transform(digest, block, transforms);
-
-    /* Hex std::string */
-    std::ostringstream result;
-    for (unsigned int i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
-    {
-        result << std::hex << std::setfill('0') << std::setw(8);
-        result << (digest[i] & 0xffffffff);
-    }
-
-    /* Reset for next run */
-    reset(digest, buffer, transforms);
-
-    return result.str();
-}
-
-
-std::string SHA1::from_file(const std::string &filename)
-{
-    std::ifstream stream(filename.c_str(), std::ios::binary);
-    SHA1 checksum;
-    checksum.update(stream);
-    return checksum.final();
-}
-
-
 void SHA1::reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
 {
     /* SHA1 initialization constants */
@@ -265,4 +178,91 @@ void SHA1::read(std::istream &is, std::string &s, size_t max)
     char sbuf[max];
     is.read(sbuf, max);
     s.assign(sbuf, is.gcount());
+}
+
+
+SHA1::SHA1()
+{
+    reset(digest, buffer, transforms);
+}
+
+
+void SHA1::update(const std::string &s)
+{
+    std::istringstream is(s);
+    update(is);
+}
+
+
+void SHA1::update(std::istream &is)
+{
+    std::string rest_of_buffer;
+    read(is, rest_of_buffer, BLOCK_BYTES - buffer.size());
+    buffer += rest_of_buffer;
+
+    while (is)
+    {
+        uint32_t block[BLOCK_INTS];
+        buffer_to_block(buffer, block);
+        transform(digest, block, transforms);
+        read(is, buffer, BLOCK_BYTES);
+    }
+}
+
+
+/*
+ * Add padding and return the message digest.
+ */
+
+std::string SHA1::final()
+{
+    /* Total number of hashed bits */
+    uint64_t total_bits = (transforms*BLOCK_BYTES + buffer.size()) * 8;
+
+    /* Padding */
+    buffer += 0x80;
+    unsigned int orig_size = buffer.size();
+    while (buffer.size() < BLOCK_BYTES)
+    {
+        buffer += (char)0x00;
+    }
+
+    uint32_t block[BLOCK_INTS];
+    buffer_to_block(buffer, block);
+
+    if (orig_size > BLOCK_BYTES - 8)
+    {
+        transform(digest, block, transforms);
+        for (unsigned int i = 0; i < BLOCK_INTS - 2; i++)
+        {
+            block[i] = 0;
+        }
+    }
+
+    /* Append total_bits, split this uint64_t into two uint32_t */
+    block[BLOCK_INTS - 1] = total_bits;
+    block[BLOCK_INTS - 2] = (total_bits >> 32);
+    transform(digest, block, transforms);
+
+    /* Hex std::string */
+    std::ostringstream result;
+    for (unsigned int i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
+    {
+        result << std::hex << std::setfill('0') << std::setw(8);
+        result << (digest[i] & 0xffffffff);
+    }
+
+    /* Reset for next run */
+    reset(digest, buffer, transforms);
+
+    return result.str();
+}
+
+
+std::string SHA1::from_file(const std::string &filename)
+{
+    std::ifstream stream(filename.c_str(), std::ios::binary);
+    SHA1 checksum;
+    checksum.update(stream);
+    return checksum.final();
 }

@@ -1,5 +1,4 @@
-CROSS =
-CXX   = $(CROSS)g++
+CXX   = clang++-3.8
 RM    = rm -f
 
 all: demo_sha1 test_sha1

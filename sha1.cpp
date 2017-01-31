@@ -15,19 +15,17 @@
         -- Volker Grabsch <vog@notjusthosting.com>
     Safety fixes
         -- Eugene Hopkinson <slowriot at voxelstorm dot com>
+    Remove streams, port to IncludeOS
+        -- fwsGonzo
 */
 
 #include "sha1.hpp"
-#include <sstream>
-#include <iomanip>
-#include <fstream>
+#include <cstring>
 
+#define BLOCK_INTS   SHA1::BLOCK_INTS
+#define BLOCK_BYTES  SHA1::BLOCK_BYTES
 
-static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
-static const size_t BLOCK_BYTES = BLOCK_INTS * 4;
-
-
-static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
+static void reset(uint32_t digest[], uint64_t &transforms)
 {
     /* SHA1 initialization constants */
     digest[0] = 0x67452301;
@@ -37,7 +35,6 @@ static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
     digest[4] = 0xc3d2e1f0;
 
     /* Reset counters */
-    buffer = "";
     transforms = 0;
 }
 
@@ -204,7 +201,7 @@ static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &t
 }
 
 
-static void buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS])
+static void buffer_to_block(const char* buffer, uint32_t block[BLOCK_INTS])
 {
     /* Convert the std::string (byte buffer) to a uint32_t array (MSB) */
     for (size_t i = 0; i < BLOCK_INTS; i++)
@@ -219,32 +216,36 @@ static void buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS
 
 SHA1::SHA1()
 {
-    reset(digest, buffer, transforms);
+    reset(digest, transforms);
 }
 
 
 void SHA1::update(const std::string &s)
 {
-    std::istringstream is(s);
-    update(is);
+    update(s.c_str(), s.size());
 }
 
 
-void SHA1::update(std::istream &is)
+void SHA1::update(const char* inbuffer, size_t inlen)
 {
-    while (true)
+    while (inlen)
     {
-        char sbuf[BLOCK_BYTES];
-        is.read(sbuf, BLOCK_BYTES - buffer.size());
-        buffer.append(sbuf, is.gcount());
-        if (buffer.size() != BLOCK_BYTES)
+        // find out how much we can copy
+        uint32_t max = BLOCK_BYTES - buffer_len;
+        max = (inlen < max) ? inlen : max;
+        // copy to working buffer
+        memcpy(&buffer[buffer_len], inbuffer, max);
+        buffer_len += max;
+        inbuffer   += max;
+        inlen      -= max;
+        // process full buffer
+        if (buffer_len == BLOCK_BYTES)
         {
-            return;
+            buffer_len = 0;
+            uint32_t block[BLOCK_INTS];
+            buffer_to_block(buffer, block);
+            transform(digest, block, transforms);
         }
-        uint32_t block[BLOCK_INTS];
-        buffer_to_block(buffer, block);
-        transform(digest, block, transforms);
-        buffer.clear();
     }
 }
 
@@ -256,14 +257,14 @@ void SHA1::update(std::istream &is)
 std::string SHA1::final()
 {
     /* Total number of hashed bits */
-    uint64_t total_bits = (transforms*BLOCK_BYTES + buffer.size()) * 8;
+    uint64_t total_bits = (transforms*BLOCK_BYTES + buffer_len) * 8;
 
     /* Padding */
-    buffer += 0x80;
-    size_t orig_size = buffer.size();
-    while (buffer.size() < BLOCK_BYTES)
+    buffer[buffer_len++] = 0x80;
+    uint32_t orig_size = buffer_len;
+    while (buffer_len < BLOCK_BYTES)
     {
-        buffer += (char)0x00;
+        buffer[buffer_len++] = (char)0x00;
     }
 
     uint32_t block[BLOCK_INTS];
@@ -283,25 +284,21 @@ std::string SHA1::final()
     block[BLOCK_INTS - 2] = (total_bits >> 32);
     transform(digest, block, transforms);
 
-    /* Hex std::string */
-    std::ostringstream result;
-    for (size_t i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
-    {
-        result << std::hex << std::setfill('0') << std::setw(8);
-        result << digest[i];
-    }
+    /* Result as hex string */
+    std::string result;  result.resize(40);
+    sprintf(&result[0], "%08x%08x%08x%08x%08x", 
+             digest[0], digest[1], digest[2], digest[3], digest[4]);
 
     /* Reset for next run */
-    reset(digest, buffer, transforms);
-
-    return result.str();
+    reset(digest, transforms);
+    buffer_len = 0;
+    
+    return result;
 }
 
-
-std::string SHA1::from_file(const std::string &filename)
+std::string SHA1::oneshot(const std::string& buffer)
 {
-    std::ifstream stream(filename.c_str(), std::ios::binary);
-    SHA1 checksum;
-    checksum.update(stream);
-    return checksum.final();
+  SHA1 object;
+  object.update(buffer.c_str(), buffer.size());
+  return object.final();
 }

@@ -15,30 +15,35 @@
         -- Volker Grabsch <vog@notjusthosting.com>
     Safety fixes
         -- Eugene Hopkinson <slowriot at voxelstorm dot com>
+    Remove streams, port to IncludeOS
+        -- fwsGonzo
 */
 
 #ifndef SHA1_HPP
 #define SHA1_HPP
 
-
 #include <cstdint>
-#include <iostream>
 #include <string>
-
 
 class SHA1
 {
 public:
+    static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
+    static const size_t BLOCK_BYTES = BLOCK_INTS * 4;
+
     SHA1();
-    void update(const std::string &s);
-    void update(std::istream &is);
+
+    void update(const std::string&);
+    void update(const char*, size_t);
     std::string final();
-    static std::string from_file(const std::string &filename);
+
+    static std::string oneshot(const std::string&);
 
 private:
-    uint32_t digest[5];
-    std::string buffer;
     uint64_t transforms;
+    uint32_t digest[5];
+    uint32_t buffer_len = 0;
+    char     buffer[BLOCK_BYTES+2];
 };
 
 

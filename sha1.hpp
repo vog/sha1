@@ -12,7 +12,7 @@
     Small changes to fit into bglibs
         -- Bruce Guenter <bruce@untroubled.org>
     Translation to simpler C++ Code
-        -- Volker Grabsch <vog@notjusthosting.com>
+        -- Volker Diels-Grabsch <v@njh.eu>
     Safety fixes
         -- Eugene Hopkinson <slowriot at voxelstorm dot com>
 */

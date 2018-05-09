@@ -8,5 +8,5 @@
 
 - Steve Reid (Original C Code)
 - [[http://untroubled.org/][Bruce Guenter]] (Small changes to fit into bglibs)
-- [[https://njh.eu/][Volker Grabsch]] (Translation to simpler C++ Code)
+- [[https://njh.eu/][Volker Diels-Grabsch]] (Translation to simpler C++ Code)
 - [[https://riot.so/][Eugene Hopkinson]] (Safety improvements)

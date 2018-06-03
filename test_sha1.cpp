@@ -35,7 +35,7 @@ void compare(const string &result, const string &expected)
  * The 3 test vectors from FIPS PUB 180-1
  */
 
-void test_standard(bool all)
+void test_standard()
 {
     // https://www.di-mgt.com.au/sha_testvectors.html
     // https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/SHA1.pdf
@@ -70,16 +70,6 @@ void test_standard(bool all)
     }
     compare(checksum.final(), "34aa973cd4c4daa4f61eeb2bdbad27316534016f");
 
-    if (all) {
-        cout << endl;
-        cout << "Test:     16,777,216 repititions of abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno" << endl;
-        for (int i = 0; i < 16777216; ++i)
-        {
-            checksum.update("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
-        }
-        compare(checksum.final(), "7789f0c9ef7bfc40d93311143dfbe69e2017f592");
-    }
-
     // https://en.wikipedia.org/wiki/SHA-1
     cout << endl;
     cout << "Test:     The quick brown fox jumps over the lazy dog" << endl;
@@ -92,6 +82,20 @@ void test_standard(bool all)
     compare(checksum.final(), "de9f2c7fd25e1b3afad3e85a0bd17d9b100db4b3");
 }
 
+void test_slow()
+{
+    // https://www.di-mgt.com.au/sha_testvectors.html
+
+    SHA1 checksum;
+
+    cout << endl;
+    cout << "Test:     16,777,216 repititions of abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno" << endl;
+    for (int i = 0; i < 16777216; ++i)
+    {
+        checksum.update("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
+    }
+    compare(checksum.final(), "7789f0c9ef7bfc40d93311143dfbe69e2017f592");
+}
 
 /*
  * Other tests
@@ -140,9 +144,9 @@ void test_file(const string &filename)
 
 int main(int argc, const char *argv[])
 {
-    bool all = (argc == 2 && std::string("--all") == argv[1]);
+    const bool slow = (argc == 2 && std::string("--slow") == argv[1]);
 
-    if (argc > 1 && !all)
+    if (argc > 1 && !slow)
     {
         for (int i = 1; i < argc; i++)
         {
@@ -151,8 +155,11 @@ int main(int argc, const char *argv[])
     }
     else
     {
-        test_standard(all);
+        test_standard();
         test_other();
+        if (slow) {
+            test_slow();
+        }
         cout << endl;
         cout << endl;
     }

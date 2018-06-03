@@ -18,16 +18,19 @@
 */
 
 #include "sha1.hpp"
+#include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <fstream>
 
 
-static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
-static const size_t BLOCK_BYTES = BLOCK_INTS * 4;
+namespace
+{
 
+const size_t BLOCK_BYTES = 512 / 8; // Bytes per 512 bit SHA1 block
+const size_t BLOCK_INTS = BLOCK_BYTES / sizeof(uint32_t);  // uint32_t's per SHA1 block
 
-static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
+void reset(uint32_t digest[], size_t &bytesRead, uint64_t &bytesTransformed)
 {
     /* SHA1 initialization constants */
     digest[0] = 0x67452301;
@@ -37,18 +40,16 @@ static void reset(uint32_t digest[], std::string &buffer, uint64_t &transforms)
     digest[4] = 0xc3d2e1f0;
 
     /* Reset counters */
-    buffer = "";
-    transforms = 0;
+    bytesRead = 0;
+    bytesTransformed = 0;
 }
 
-
-static uint32_t rol(const uint32_t value, const size_t bits)
+uint32_t rol(const uint32_t value, const size_t bits)
 {
     return (value << bits) | (value >> (32 - bits));
 }
 
-
-static uint32_t blk(const uint32_t block[BLOCK_INTS], const size_t i)
+uint32_t blk(const uint32_t block[BLOCK_INTS], const size_t i)
 {
     return rol(block[(i+13)&15] ^ block[(i+8)&15] ^ block[(i+2)&15] ^ block[i], 1);
 }
@@ -58,50 +59,44 @@ static uint32_t blk(const uint32_t block[BLOCK_INTS], const size_t i)
  * (R0+R1), R2, R3, R4 are the different operations used in SHA1
  */
 
-static void R0(const uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+void R0(const uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
     z += ((w&(x^y))^y) + block[i] + 0x5a827999 + rol(v, 5);
     w = rol(w, 30);
 }
 
-
-static void R1(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+void R1(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
     block[i] = blk(block, i);
     z += ((w&(x^y))^y) + block[i] + 0x5a827999 + rol(v, 5);
     w = rol(w, 30);
 }
 
-
-static void R2(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+void R2(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
     block[i] = blk(block, i);
     z += (w^x^y) + block[i] + 0x6ed9eba1 + rol(v, 5);
     w = rol(w, 30);
 }
 
-
-static void R3(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+void R3(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
     block[i] = blk(block, i);
     z += (((w|x)&y)|(w&x)) + block[i] + 0x8f1bbcdc + rol(v, 5);
     w = rol(w, 30);
 }
 
-
-static void R4(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+void R4(uint32_t block[BLOCK_INTS], const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
 {
     block[i] = blk(block, i);
     z += (w^x^y) + block[i] + 0xca62c1d6 + rol(v, 5);
     w = rol(w, 30);
 }
 
-
 /*
  * Hash a single 512-bit block. This is the core of the algorithm.
  */
-
-static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &transforms)
+void transform(uint32_t digest[], uint32_t block[BLOCK_INTS])
 {
     /* Copy digest[] to working vars */
     uint32_t a = digest[0];
@@ -198,28 +193,25 @@ static void transform(uint32_t digest[], uint32_t block[BLOCK_INTS], uint64_t &t
     digest[2] += c;
     digest[3] += d;
     digest[4] += e;
-
-    /* Count the number of transformations */
-    transforms++;
 }
 
-
-static void buffer_to_block(const std::string &buffer, uint32_t block[BLOCK_INTS])
+void buffer_to_block(uint8_t buffer[BLOCK_BYTES], uint32_t block[BLOCK_INTS])
 {
     /* Convert the std::string (byte buffer) to a uint32_t array (MSB) */
     for (size_t i = 0; i < BLOCK_INTS; i++)
     {
-        block[i] = (buffer[4*i+3] & 0xff)
-                   | (buffer[4*i+2] & 0xff)<<8
-                   | (buffer[4*i+1] & 0xff)<<16
-                   | (buffer[4*i+0] & 0xff)<<24;
+        block[i] = buffer[4*i+3]
+                   | buffer[4*i+2] << 8
+                   | buffer[4*i+1] << 16
+                   | buffer[4*i+0] << 24;
     }
 }
 
+} // unnamed namespace
 
 SHA1::SHA1()
 {
-    reset(digest, buffer, transforms);
+    reset(digest, bytesRead, bytesTransformed);
 }
 
 
@@ -234,17 +226,19 @@ void SHA1::update(std::istream &is)
 {
     while (true)
     {
-        char sbuf[BLOCK_BYTES];
-        is.read(sbuf, BLOCK_BYTES - buffer.size());
-        buffer.append(sbuf, is.gcount());
-        if (buffer.size() != BLOCK_BYTES)
-        {
+        is.read(reinterpret_cast<char*>(&buffer[bytesRead]), BLOCK_BYTES - bytesRead);
+        bytesRead += is.gcount();
+        if (bytesRead != BLOCK_BYTES) {
             return;
         }
+
         uint32_t block[BLOCK_INTS];
         buffer_to_block(buffer, block);
-        transform(digest, block, transforms);
-        buffer.clear();
+
+        transform(digest, block);
+
+        bytesTransformed += BLOCK_BYTES;
+        bytesRead = 0;
     }
 }
 
@@ -256,43 +250,37 @@ void SHA1::update(std::istream &is)
 std::string SHA1::final()
 {
     /* Total number of hashed bits */
-    uint64_t total_bits = (transforms*BLOCK_BYTES + buffer.size()) * 8;
+    uint64_t total_bits = (bytesTransformed + bytesRead) * 8;
 
     /* Padding */
-    buffer += 0x80;
-    size_t orig_size = buffer.size();
-    while (buffer.size() < BLOCK_BYTES)
-    {
-        buffer += (char)0x00;
+    buffer[bytesRead] = 0x80;
+    ++bytesRead;
+    if (bytesRead < BLOCK_BYTES) {
+        std::fill_n(buffer + bytesRead, BLOCK_BYTES - bytesRead, 0);
     }
 
     uint32_t block[BLOCK_INTS];
     buffer_to_block(buffer, block);
 
-    if (orig_size > BLOCK_BYTES - 8)
-    {
-        transform(digest, block, transforms);
-        for (size_t i = 0; i < BLOCK_INTS - 2; i++)
-        {
-            block[i] = 0;
-        }
+    if (bytesRead > BLOCK_BYTES - (sizeof(block[0]) * 2)) {
+        transform(digest, block);
+        std::fill_n(block, BLOCK_INTS - 2, 0);
     }
 
     /* Append total_bits, split this uint64_t into two uint32_t */
-    block[BLOCK_INTS - 1] = total_bits;
+    block[BLOCK_INTS - 1] = total_bits & 0xFFFFFFFF;
     block[BLOCK_INTS - 2] = (total_bits >> 32);
-    transform(digest, block, transforms);
+    transform(digest, block);
 
     /* Hex std::string */
     std::ostringstream result;
-    for (size_t i = 0; i < sizeof(digest) / sizeof(digest[0]); i++)
-    {
-        result << std::hex << std::setfill('0') << std::setw(8);
-        result << digest[i];
+    result << std::hex << std::setfill('0');
+    for (size_t i = 0; i < sizeof(digest) / sizeof(digest[0]); i++) {
+        result << std::setw(8) << digest[i];
     }
 
     /* Reset for next run */
-    reset(digest, buffer, transforms);
+    reset(digest, bytesRead, bytesTransformed);
 
     return result.str();
 }

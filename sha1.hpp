@@ -36,9 +36,10 @@ public:
     static std::string from_file(const std::string &filename);
 
 private:
+    uint8_t buffer[512 / 8]; // 512 bit SHA1 block = 64 bytes
+    size_t bytesRead;
     uint32_t digest[5];
-    std::string buffer;
-    uint64_t transforms;
+    uint64_t bytesTransformed;
 };
 
 

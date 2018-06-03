@@ -60,6 +60,17 @@ void test_standard()
                        );
     }
     compare(checksum.final(), "34aa973cd4c4daa4f61eeb2bdbad27316534016f");
+
+    // Tests from wikipedia https://en.wikipedia.org/wiki/SHA-1
+    cout << endl;
+    cout << "Test:     The quick brown fox jumps over the lazy dog" << endl;
+    checksum.update("The quick brown fox jumps over the lazy dog");
+    compare(checksum.final(), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12");
+
+    cout << endl;
+    cout << "Test:     The quick brown fox jumps over the lazy cog" << endl;
+    checksum.update("The quick brown fox jumps over the lazy cog");
+    compare(checksum.final(), "de9f2c7fd25e1b3afad3e85a0bd17d9b100db4b3");
 }
 
 

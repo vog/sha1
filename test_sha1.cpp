@@ -35,8 +35,11 @@ void compare(const string &result, const string &expected)
  * The 3 test vectors from FIPS PUB 180-1
  */
 
-void test_standard()
+void test_standard(bool all)
 {
+    // https://www.di-mgt.com.au/sha_testvectors.html
+    // https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/SHA1.pdf
+
     SHA1 checksum;
 
     cout << endl;
@@ -49,6 +52,12 @@ void test_standard()
     checksum.update("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     compare(checksum.final(), "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
 
+
+    cout << endl;
+    cout << "Test:     abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" << endl;
+    checksum.update("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
+    compare(checksum.final(), "a49b2446a02c645bf419f995b67091253a04a259");
+
     cout << endl;
     cout << "Test:     A million repetitions of 'a'" << endl;
     for (int i = 0; i < 1000000/200; ++i)
@@ -60,6 +69,27 @@ void test_standard()
                        );
     }
     compare(checksum.final(), "34aa973cd4c4daa4f61eeb2bdbad27316534016f");
+
+    if (all) {
+        cout << endl;
+        cout << "Test:     16,777,216 repititions of abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno" << endl;
+        for (int i = 0; i < 16777216; ++i)
+        {
+            checksum.update("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
+        }
+        compare(checksum.final(), "7789f0c9ef7bfc40d93311143dfbe69e2017f592");
+    }
+
+    // https://en.wikipedia.org/wiki/SHA-1
+    cout << endl;
+    cout << "Test:     The quick brown fox jumps over the lazy dog" << endl;
+    checksum.update("The quick brown fox jumps over the lazy dog");
+    compare(checksum.final(), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12");
+
+    cout << endl;
+    cout << "Test:     The quick brown fox jumps over the lazy cog" << endl;
+    checksum.update("The quick brown fox jumps over the lazy cog");
+    compare(checksum.final(), "de9f2c7fd25e1b3afad3e85a0bd17d9b100db4b3");
 }
 
 
@@ -110,7 +140,9 @@ void test_file(const string &filename)
 
 int main(int argc, const char *argv[])
 {
-    if (argc > 1)
+    bool all = (argc == 2 && std::string("--all") == argv[1]);
+
+    if (argc > 1 && !all)
     {
         for (int i = 1; i < argc; i++)
         {
@@ -119,7 +151,7 @@ int main(int argc, const char *argv[])
     }
     else
     {
-        test_standard();
+        test_standard(all);
         test_other();
         cout << endl;
         cout << endl;

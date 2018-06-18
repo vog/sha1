@@ -131,10 +131,24 @@ void test_other()
 /*
  * immitate "sha1sum -b"
  */
-
+#include <fstream>
+#include <streambuf>
 void test_file(const string &filename)
 {
-    cout << SHA1::from_file(filename) << " *" << filename << endl;
+    std::ifstream fstream(filename, std::ios::binary);
+    std::string str;
+
+    fstream.seekg(0, std::ios::end);   
+    str.reserve(fstream.tellg());
+    fstream.seekg(0, std::ios::beg);
+
+    str.assign(std::istreambuf_iterator<char>(fstream),
+               std::istreambuf_iterator<char>());
+
+    SHA1 sha1;
+    sha1.update(str.c_str(), str.size());
+    
+    cout << sha1.final() << " *" << filename << endl;
 }
 
 

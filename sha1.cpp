@@ -236,7 +236,7 @@ void SHA1::update(std::istream &is)
     {
         char sbuf[BLOCK_BYTES];
         is.read(sbuf, BLOCK_BYTES - buffer.size());
-        buffer.append(sbuf, is.gcount());
+        buffer.append(sbuf, (std::size_t)is.gcount());
         if (buffer.size() != BLOCK_BYTES)
         {
             return;
@@ -259,7 +259,7 @@ std::string SHA1::final()
     uint64_t total_bits = (transforms*BLOCK_BYTES + buffer.size()) * 8;
 
     /* Padding */
-    buffer += 0x80;
+    buffer += (char)0x80;
     size_t orig_size = buffer.size();
     while (buffer.size() < BLOCK_BYTES)
     {
@@ -279,8 +279,8 @@ std::string SHA1::final()
     }
 
     /* Append total_bits, split this uint64_t into two uint32_t */
-    block[BLOCK_INTS - 1] = total_bits;
-    block[BLOCK_INTS - 2] = (total_bits >> 32);
+    block[BLOCK_INTS - 1] = (uint32_t)total_bits;
+    block[BLOCK_INTS - 2] = (uint32_t)(total_bits >> 32);
     transform(digest, block, transforms);
 
     /* Hex std::string */

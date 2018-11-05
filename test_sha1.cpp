@@ -129,7 +129,7 @@ void test_other()
 
 
 /*
- * immitate "sha1sum -b"
+ * Produce same output as "sha1sum -b"
  */
 
 void test_file(const string &filename)

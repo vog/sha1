@@ -22,7 +22,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
-int main(int argc, const char *argv[])
+int main(int /* argc */, const char ** /* argv */)
 {
     const string input = "abc";
 

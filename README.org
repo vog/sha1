@@ -1,5 +1,8 @@
 * SHA-1 implementation in C++
 
+- Source code for SHA-1 is in sha-src
+- All other folders are needed to build on the MBED platform for ARM core devices
+
 ** Warning
 
 Do not use SHA-1 unless you have to! Although SHA-1 is not as broken as SHA-0 and MD5, [[https://en.wikipedia.org/wiki/SHA-1#The_SHAppening][SHA-1 is generally considered weak]]. Use a hash function from the [[https://en.wikipedia.org/wiki/SHA-2][SHA-2]] or [[https://en.wikipedia.org/wiki/SHA-3][SHA-3]] family instead.
@@ -14,3 +17,4 @@ Do not use SHA-1 unless you have to! Although SHA-1 is not as broken as SHA-0 an
 - [[http://untroubled.org/][Bruce Guenter]] (Small changes to fit into bglibs)
 - [[https://njh.eu/][Volker Diels-Grabsch]] (Translation to simpler C++ Code)
 - [[https://riot.so/][Eugene Hopkinson]] (Safety improvements)
+- Conor Hayes, Mingzhong Guo, Yulong Ding, Jamie Smith (Porting to run on ARM MCU's using MBED OS)

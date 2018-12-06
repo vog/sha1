@@ -10,21 +10,6 @@ project(Hamster C CXX)
 
 include(cmake/mbed.cmake)
 
-# set up doxygen
-# find_package(Doxygen)
-
-# if(DOXYGEN_FOUND)
-# 	set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc)
-# 	message(STATUS "Documentation available as 'make doc' target")
-# 	doxygen_add_docs(doc
-# 		libraries
-# 		hamster-core
-# 		test
-# 		COMMENT "Generating docuentation with Doxygen...")
-# else()
-# 	message(STATUS "Doxygen not found, documentation unavailable")
-# endif()
-
 # warning flags
 add_compile_options(-Wall)
 

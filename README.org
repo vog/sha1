@@ -7,9 +7,21 @@
 
 Do not use SHA-1 unless you have to! Although SHA-1 is not as broken as SHA-0 and MD5, [[https://en.wikipedia.org/wiki/SHA-1#The_SHAppening][SHA-1 is generally considered weak]]. Use a hash function from the [[https://en.wikipedia.org/wiki/SHA-2][SHA-2]] or [[https://en.wikipedia.org/wiki/SHA-3][SHA-3]] family instead.
 
+
+** Build Instructions
+
+```
+mkdir build
+cd build
+cmake ..
+make test-sha1
+```
+Then flash the .bin file in `build/sha-src` to your MBED-enabled device using whichever method your device
+datasheet recommends.
+
 ** License
 
-100% Public Domain
+100% Public Domain, except the mbed-src, MODSERIAL, and cmake directories. See individual files for licensing info there.
 
 ** Authors
 

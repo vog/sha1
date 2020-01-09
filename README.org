@@ -2,7 +2,7 @@
 
 ** Warning
 
-Do not use SHA-1 unless you have to! Although SHA-1 is not as broken as SHA-0 and MD5, [[https://en.wikipedia.org/wiki/SHA-1#The_SHAppening][SHA-1 is generally considered weak]]. Use a hash function from the [[https://en.wikipedia.org/wiki/SHA-2][SHA-2]] or [[https://en.wikipedia.org/wiki/SHA-3][SHA-3]] family instead.
+Do not use SHA-1 unless you have to! [[https://en.wikipedia.org/wiki/SHA-1#Birthday-Near-Collision_Attack_%E2%80%93_first_practical_chosen-prefix_attack][SHA-1 is practically broken]]. Use a hash function from the [[https://en.wikipedia.org/wiki/SHA-2][SHA-2]] or [[https://en.wikipedia.org/wiki/SHA-3][SHA-3]] family instead.
 
 ** License
 

@@ -1,5 +1,5 @@
 /*
-    sha1.cpp - source code of
+    sha1.hpp - header of
 
     ============
     SHA-1 in C++
@@ -19,4 +19,29 @@
         -- Zlatko Michailov
 */
 
-#include "sha1.hpp"
+#ifndef SHA1_I_HPP
+#define SHA1_I_HPP
+
+
+#include <cstdint>
+#include <iostream>
+#include <string>
+
+
+class SHA1
+{
+public:
+    SHA1();
+    void update(const std::string &s);
+    void update(std::istream &is);
+    std::string final();
+    static std::string from_file(const std::string &filename);
+
+private:
+    uint32_t digest[5];
+    std::string buffer;
+    uint64_t transforms;
+};
+
+
+#endif /* SHA1_I_HPP */

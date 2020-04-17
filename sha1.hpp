@@ -16,17 +16,35 @@
     Safety fixes
         -- Eugene Hopkinson <slowriot at voxelstorm dot com>
     Header-only library
-        -- Zlatko Michailov
+        -- Zlatko Michailov <zlatko@michailov.org>
 */
 
 #ifndef SHA1_HPP
 #define SHA1_HPP
 
 
-#include "sha1.i.hpp"
+#include <cstdint>
+#include <iostream>
+#include <string>
 #include <sstream>
 #include <iomanip>
 #include <fstream>
+
+
+class SHA1
+{
+public:
+    SHA1();
+    void update(const std::string &s);
+    void update(std::istream &is);
+    std::string final();
+    static std::string from_file(const std::string &filename);
+
+private:
+    uint32_t digest[5];
+    std::string buffer;
+    uint64_t transforms;
+};
 
 
 static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */

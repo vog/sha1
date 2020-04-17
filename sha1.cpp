@@ -1,5 +1,7 @@
 /*
-    sha1.cpp - source code of
+    sha1.cpp - This file is intenionally left blank.
+    This file is no longer needed. It is only kept for backard compatibility.
+    Simply: #include "sha1.hpp"
 
     ============
     SHA-1 in C++
@@ -16,7 +18,6 @@
     Safety fixes
         -- Eugene Hopkinson <slowriot at voxelstorm dot com>
     Header-only library
-        -- Zlatko Michailov
+        -- Zlatko Michailov <zlatko@michailov.org>
 */
 
-#include "sha1.hpp"

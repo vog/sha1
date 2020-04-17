@@ -16,16 +16,14 @@
 */
 
 #include "sha1.hpp"
-#include <cstring>
 #include <string>
 #include <iostream>
 using std::string;
 using std::cout;
 using std::endl;
 
-extern void test_dummy();
 
-static void compare(const string &result, const string &expected)
+void compare(const string &result, const string &expected)
 {
     const string &state = (result == expected) ? "OK" : "Failure";
     cout << "Result:   " << result << endl;
@@ -150,28 +148,9 @@ void test_file(const string &filename)
 
 int main(int argc, const char *argv[])
 {
-    bool slow = false;
-    bool dummy = false;
-    bool file = false;
+    const bool slow = (argc == 2 && std::string("--slow") == argv[1]);
 
-    for (int i = 1; i < argc; i++)
-    {
-        if (std::strcmp("--slow", argv[i]) == 0)
-        {
-            slow = true;
-        }
-        else if (std::strcmp("--dummy", argv[i]) == 0)
-        {
-            dummy = true;
-        }
-        else
-        {
-            file = argv[i];
-        }
-        
-    }
-
-    if (file && !slow && !dummy)
+    if (argc > 1 && !slow)
     {
         for (int i = 1; i < argc; i++)
         {
@@ -182,13 +161,8 @@ int main(int argc, const char *argv[])
     {
         test_standard();
         test_other();
-        if (slow)
-        {
+        if (slow) {
             test_slow();
-        }
-        if (dummy)
-        {
-            test_dummy();
         }
         cout << endl;
         cout << endl;

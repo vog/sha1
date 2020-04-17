@@ -14,4 +14,4 @@ Do not use SHA-1 unless you have to! [[https://en.wikipedia.org/wiki/SHA-1#Birth
 - [[http://untroubled.org/][Bruce Guenter]] (Small changes to fit into bglibs)
 - [[https://njh.eu/][Volker Diels-Grabsch]] (Translation to simpler C++ Code)
 - [[https://riot.so/][Eugene Hopkinson]] (Safety improvements)
-- Zlatko Michailov (Header-only library)
+- [[http://zlatko.michailov.org][Zlatko Michailov]] (Header-only library)

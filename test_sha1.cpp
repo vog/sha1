@@ -13,14 +13,20 @@
         -- Bruce Guenter <bruce@untroubled.org>
     Translation to simpler C++ Code
         -- Volker Diels-Grabsch <v@njh.eu>
+    Header-only library
+        -- Zlatko Michailov <zlatko@michailov.org>
 */
 
 #include "sha1.hpp"
-#include <string>
+#include "sha1.hpp" // Intentionally included twice for testing purposes 
 #include <iostream>
+#include <string>
 using std::string;
 using std::cout;
 using std::endl;
+
+
+void test_file(const string &filename);
 
 
 void compare(const string &result, const string &expected)
@@ -131,16 +137,6 @@ void test_other()
     checksum.update(std::string("a" "\x00" "b" "\x7f" "c" "\x80" "d" "\xff" "e" "\xc3\xf0" "f", 12));
     compare(checksum.final(), "cd0dd10814c0d4f9c6a2a0a4be2304d2371468d3");
 }
-
-/*
- * Produce same output as "sha1sum -b"
- */
-
-void test_file(const string &filename)
-{
-    cout << SHA1::from_file(filename) << " *" << filename << endl;
-}
-
 
 /*
  * main

@@ -24,11 +24,11 @@
 
 
 #include <cstdint>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 
 class SHA1

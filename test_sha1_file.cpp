@@ -1,5 +1,6 @@
 /*
-    test_sha1.cpp - test program of
+    test_sha1_file.cpp - tests are intentionally split in two files.
+    The purpose of the split is to test linking of multiple files that include sha1.hpp.
  
     ============
     SHA-1 in C++

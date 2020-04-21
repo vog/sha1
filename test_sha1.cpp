@@ -26,6 +26,10 @@ using std::cout;
 using std::endl;
 
 
+/*
+ * This method is defined in test_sha1_file.cpp.
+ * The purpose of the split is to test linking of multiple files that include sha1.hpp.
+ */
 void test_file(const string &filename);
 
 

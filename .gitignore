@@ -1,0 +1,9 @@
+# Maintain the following order in this file:
+#   1. List folders, sorted alphabetically.
+#   2. Leave a blank line betweem folders and files.
+#   3. List files, sorted alphabetically. Do not list this .gitignore file.
+
+.vscode/
+
+demo_sha1
+test_sha1

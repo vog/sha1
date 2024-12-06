@@ -1,0 +1,40 @@
+# C and C++
+---
+AlignEscapedNewlines: Left
+AlignTrailingComments: true
+BasedOnStyle: LLVM
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterFunction: false
+  AfterEnum: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+BreakBeforeBraces: Custom
+BreakBeforeInheritanceComma: true
+BreakConstructorInitializers: BeforeComma
+ColumnLimit: 120
+IndentAccessModifiers: false
+IndentCaseLabels: true
+IndentPPDirectives: None
+IndentRequiresClause: false
+IndentWidth: 2
+InsertNewlineAtEOF: true
+# clang clang-format 19
+# KeepEmptyLines:
+#   AtEndOfFile: true
+LineEnding: LF
+NamespaceIndentation: None
+QualifierAlignment: Right
+ReflowComments: false
+RemoveSemicolon: true
+RequiresClausePosition: WithFollowing
+RequiresExpressionIndentation: OuterScope
+SpaceAfterTemplateKeyword: false
+TabWidth: 2

@@ -1,0 +1,8 @@
+perf stat ./../bin/test_sha1
+0.011223803 seconds time elapsed
+
+perf stat ./../bin/test_sha1 --slow
+6.446021922 seconds time elapsed
+
+perf stat ./../bin/test_sha1 /tmp/1G_test_file.txt
+1.885112058 seconds time elapsed

@@ -1,3 +1,5 @@
 /.vscode/
 /demo_sha1
 /test_sha1
+bin/
+build/

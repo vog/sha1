@@ -26,3 +26,4 @@ make
 - [Volker Diels-Grabsch](https://njh.eu/) (Translation to simpler C++ Code)
 - [Eugene Hopkinson](https://riot.so/) (Safety improvements)
 - [Zlatko Michailov](http://zlatko.michailov.org) (Header-only library)
+- [Dan Machado](dan-machado@yandex.com) (Refactoring)

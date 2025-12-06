@@ -37,29 +37,75 @@ class SHA1
 {
 public:
     SHA1();
+     /**
+     * Partially calculate the sha1sum of its argument. The calculation
+     * is completed by calling final(). Consecutive calls to update()
+     * will have the effect of calculating the sha1 sum of the concatenated
+     * string of its arguments. For example:
+     * SHA1 sha1;
+     * sha1.update(str1);
+     * sha1.update(str2);
+     * sha1.update(str3);
+     * sha1.final();
+     * is the same than
+     * sha1.update(str1 + str2 + str3);
+     * sha1.final();
+     *
+     * @param cstr null terminated string
+     *
+     * */
     void update(const std::string &s);
-    void update(std::istream &is);
+     void update(std::istream &is);
+
+     /**
+     * Complete the calculation of the sha1sum initiated by calls to
+     * SHA1::update.
+     *
+     * @return return the sha1sum of the string (or strings)
+     *         fed by calls to SHA1::update.
+     * */
     std::string final();
+
+     /**
+     * Get the sha1sum of a file/
+     *
+     * @return return the sha1sum of the content of the specified file.
+     * 
+     * */
     static std::string from_file(const std::string &filename);
 
-private:    
-
+private:
     static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
     static const size_t BLOCK_BYTES = BLOCK_INTS * 4;
 
-     uint32_t m_dataBlock[BLOCK_INTS];
+    uint32_t m_dataBlock[BLOCK_INTS];
     uint32_t m_digest[5];
     std::string m_buffer;
     uint64_t transforms;
 
     void reset();
-    uint32_t rol(const uint32_t value, const size_t bits);
-    uint32_t blk(const size_t i);
-    void R0(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i);
-    void R1(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i);
-    void R2(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i);
-    void R3(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i);
-    void R4(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i);
+    template<int N, int M>
+    uint32_t rol(uint32_t value);
+
+    void blk(const size_t i);
+    /*
+    * R0, R1, R2, R3, R4 are the different operations used in SHA1
+    */
+    template<int v, int w, int x, int y, int z>
+    void R0(const size_t i);
+
+    template<int v, int w, int x, int y, int z>
+    void R1(const size_t i);
+
+    template<int v, int w, int x, int y, int z>
+    void R2(const size_t i);
+
+    template<int v, int w, int x, int y, int z>
+    void R3(const size_t i);
+
+    template<int v, int w, int x, int y, int z>
+    void R4(const size_t i);
+
     void transform();
     void buffer_to_block();
 };
@@ -80,15 +126,16 @@ inline void SHA1::reset()
 }
 
 
-inline uint32_t SHA1::rol(const uint32_t value, const size_t bits)
+template<int N, int M>
+inline uint32_t SHA1::rol(uint32_t value)
 {
-    return (value << bits) | (value >> (32 - bits));
+    return (value << N) | (value >> M);
 }
 
 
-inline uint32_t SHA1::blk(const size_t i)
+inline void SHA1::blk(const size_t i)
 {
-    return rol(m_dataBlock[(i+13)&15] ^ m_dataBlock[(i+8)&15] ^ m_dataBlock[(i+2)&15] ^ m_dataBlock[i], 1);
+     m_dataBlock[i]=rol<1, 31>(m_dataBlock[(i+13)&15] ^ m_dataBlock[(i+8)&15] ^ m_dataBlock[(i+2)&15] ^ m_dataBlock[i]);
 }
 
 
@@ -96,42 +143,42 @@ inline uint32_t SHA1::blk(const size_t i)
  * (R0+R1), R2, R3, R4 are the different operations used in SHA1
  */
 
-inline void SHA1::R0(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+template<int v, int w, int x, int y, int z>
+inline void SHA1::R0(const size_t i)
 {
-    z += ((w&(x^y))^y) + m_dataBlock[i] + 0x5a827999 + rol(v, 5);
-    w = rol(w, 30);
+    m_digest[z] =m_digest[z]+ ((m_digest[w]&(m_digest[x]^m_digest[y]))^m_digest[y]) + m_dataBlock[i] + 0x5a827999 + rol<5, 27>(m_digest[v]);
+    m_digest[w] = rol<30, 2>(m_digest[w]);
 }
 
-
-inline void SHA1::R1(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+template<int v, int w, int x, int y, int z>
+inline void SHA1::R1(const size_t i)
 {
-    m_dataBlock[i] = blk(i);
-    z += ((w&(x^y))^y) + m_dataBlock[i] + 0x5a827999 + rol(v, 5);
-    w = rol(w, 30);
+    blk(i);
+    R0<v,w,x,y,z>(i);
 }
 
-
-inline void SHA1::R2(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+template<int v, int w, int x, int y, int z>
+inline void SHA1::R2(const size_t i)
 {
-    m_dataBlock[i] = blk(i);
-    z += (w^x^y) + m_dataBlock[i] + 0x6ed9eba1 + rol(v, 5);
-    w = rol(w, 30);
+    blk(i);
+    m_digest[z] =m_digest[z]+ (m_digest[w]^m_digest[x]^m_digest[y]) + m_dataBlock[i] + 0x6ed9eba1 + rol<5, 27>(m_digest[v]);
+    m_digest[w] = rol<30, 2>(m_digest[w]);
 }
 
-
-inline void SHA1::R3(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+template<int v, int w, int x, int y, int z>
+inline void SHA1::R3(const size_t i)
 {
-    m_dataBlock[i] = blk(i);
-    z += (((w|x)&y)|(w&x)) + m_dataBlock[i] + 0x8f1bbcdc + rol(v, 5);
-    w = rol(w, 30);
+    blk(i);
+    m_digest[z] =m_digest[z]+ (((m_digest[w]|m_digest[x])&m_digest[y])|(m_digest[w]&m_digest[x])) + m_dataBlock[i] + 0x8f1bbcdc + rol<5, 27>(m_digest[v]);
+    m_digest[w] = rol<30, 2>(m_digest[w]);
 }
 
-
-inline void SHA1::R4(const uint32_t v, uint32_t &w, const uint32_t x, const uint32_t y, uint32_t &z, const size_t i)
+template<int v, int w, int x, int y, int z>
+inline void SHA1::R4(const size_t i)
 {
-    m_dataBlock[i] = blk(i);
-    z += (w^x^y) + m_dataBlock[i] + 0xca62c1d6 + rol(v, 5);
-    w = rol(w, 30);
+    blk(i);
+    m_digest[z] =m_digest[z]+ (m_digest[w]^m_digest[x]^m_digest[y]) + m_dataBlock[i] + 0xca62c1d6 + rol<5, 27>(m_digest[v]);
+    m_digest[w] = rol<30, 2>(m_digest[w]);
 }
 
 
@@ -149,86 +196,86 @@ inline void SHA1::transform()
     uint32_t e = m_digest[4];
 
     /* 4 rounds of 20 operations each. Loop unrolled. */
-    R0(a, b, c, d, e,  0);
-    R0(e, a, b, c, d,  1);
-    R0(d, e, a, b, c,  2);
-    R0(c, d, e, a, b,  3);
-    R0(b, c, d, e, a,  4);
-    R0(a, b, c, d, e,  5);
-    R0(e, a, b, c, d,  6);
-    R0(d, e, a, b, c,  7);
-    R0(c, d, e, a, b,  8);
-    R0(b, c, d, e, a,  9);
-    R0(a, b, c, d, e, 10);
-    R0(e, a, b, c, d, 11);
-    R0(d, e, a, b, c, 12);
-    R0(c, d, e, a, b, 13);
-    R0(b, c, d, e, a, 14);
-    R0(a, b, c, d, e, 15);
-    R1(e, a, b, c, d,  0);
-    R1(d, e, a, b, c,  1);
-    R1(c, d, e, a, b,  2);
-    R1(b, c, d, e, a,  3);
-    R2(a, b, c, d, e,  4);
-    R2(e, a, b, c, d,  5);
-    R2(d, e, a, b, c,  6);
-    R2(c, d, e, a, b,  7);
-    R2(b, c, d, e, a,  8);
-    R2(a, b, c, d, e,  9);
-    R2(e, a, b, c, d, 10);
-    R2(d, e, a, b, c, 11);
-    R2(c, d, e, a, b, 12);
-    R2(b, c, d, e, a, 13);
-    R2(a, b, c, d, e, 14);
-    R2(e, a, b, c, d, 15);
-    R2(d, e, a, b, c,  0);
-    R2(c, d, e, a, b,  1);
-    R2(b, c, d, e, a,  2);
-    R2(a, b, c, d, e,  3);
-    R2(e, a, b, c, d,  4);
-    R2(d, e, a, b, c,  5);
-    R2(c, d, e, a, b,  6);
-    R2(b, c, d, e, a,  7);
-    R3(a, b, c, d, e,  8);
-    R3(e, a, b, c, d,  9);
-    R3(d, e, a, b, c, 10);
-    R3(c, d, e, a, b, 11);
-    R3(b, c, d, e, a, 12);
-    R3(a, b, c, d, e, 13);
-    R3(e, a, b, c, d, 14);
-    R3(d, e, a, b, c, 15);
-    R3(c, d, e, a, b,  0);
-    R3(b, c, d, e, a,  1);
-    R3(a, b, c, d, e,  2);
-    R3(e, a, b, c, d,  3);
-    R3(d, e, a, b, c,  4);
-    R3(c, d, e, a, b,  5);
-    R3(b, c, d, e, a,  6);
-    R3(a, b, c, d, e,  7);
-    R3(e, a, b, c, d,  8);
-    R3(d, e, a, b, c,  9);
-    R3(c, d, e, a, b, 10);
-    R3(b, c, d, e, a, 11);
-    R4(a, b, c, d, e, 12);
-    R4(e, a, b, c, d, 13);
-    R4(d, e, a, b, c, 14);
-    R4(c, d, e, a, b, 15);
-    R4(b, c, d, e, a,  0);
-    R4(a, b, c, d, e,  1);
-    R4(e, a, b, c, d,  2);
-    R4(d, e, a, b, c,  3);
-    R4(c, d, e, a, b,  4);
-    R4(b, c, d, e, a,  5);
-    R4(a, b, c, d, e,  6);
-    R4(e, a, b, c, d,  7);
-    R4(d, e, a, b, c,  8);
-    R4(c, d, e, a, b,  9);
-    R4(b, c, d, e, a, 10);
-    R4(a, b, c, d, e, 11);
-    R4(e, a, b, c, d, 12);
-    R4(d, e, a, b, c, 13);
-    R4(c, d, e, a, b, 14);
-    R4(b, c, d, e, a, 15);
+    R0<0, 1, 2, 3, 4>( 0);
+    R0<4, 0, 1, 2, 3>( 1);
+    R0<3, 4, 0, 1, 2>( 2);
+    R0<2, 3, 4, 0, 1>( 3);
+    R0<1, 2, 3, 4, 0>( 4);
+    R0<0, 1, 2, 3, 4>( 5);
+    R0<4, 0, 1, 2, 3>( 6);
+    R0<3, 4, 0, 1, 2>( 7);
+    R0<2, 3, 4, 0, 1>( 8);
+    R0<1, 2, 3, 4, 0>( 9);
+    R0<0, 1, 2, 3, 4>(10);
+    R0<4, 0, 1, 2, 3>(11);
+    R0<3, 4, 0, 1, 2>(12);
+    R0<2, 3, 4, 0, 1>(13);
+    R0<1, 2, 3, 4, 0>(14);
+    R0<0, 1, 2, 3, 4>(15);
+    R1<4, 0, 1, 2, 3>( 0);
+    R1<3, 4, 0, 1, 2>( 1);
+    R1<2, 3, 4, 0, 1>( 2);
+    R1<1, 2, 3, 4, 0>( 3);
+    R2<0, 1, 2, 3, 4>( 4);
+    R2<4, 0, 1, 2, 3>( 5);
+    R2<3, 4, 0, 1, 2>( 6);
+    R2<2, 3, 4, 0, 1>( 7);
+    R2<1, 2, 3, 4, 0>( 8);
+    R2<0, 1, 2, 3, 4>( 9);
+    R2<4, 0, 1, 2, 3>(10);
+    R2<3, 4, 0, 1, 2>(11);
+    R2<2, 3, 4, 0, 1>(12);
+    R2<1, 2, 3, 4, 0>(13);
+    R2<0, 1, 2, 3, 4>(14);
+    R2<4, 0, 1, 2, 3>(15);
+    R2<3, 4, 0, 1, 2>( 0);
+    R2<2, 3, 4, 0, 1>( 1);
+    R2<1, 2, 3, 4, 0>( 2);
+    R2<0, 1, 2, 3, 4>( 3);
+    R2<4, 0, 1, 2, 3>( 4);
+    R2<3, 4, 0, 1, 2>( 5);
+    R2<2, 3, 4, 0, 1>( 6);
+    R2<1, 2, 3, 4, 0>( 7);
+    R3<0, 1, 2, 3, 4>( 8);
+    R3<4, 0, 1, 2, 3>( 9);
+    R3<3, 4, 0, 1, 2>(10);
+    R3<2, 3, 4, 0, 1>(11);
+    R3<1, 2, 3, 4, 0>(12);
+    R3<0, 1, 2, 3, 4>(13);
+    R3<4, 0, 1, 2, 3>(14);
+    R3<3, 4, 0, 1, 2>(15);
+    R3<2, 3, 4, 0, 1>( 0);
+    R3<1, 2, 3, 4, 0>( 1);
+    R3<0, 1, 2, 3, 4>( 2);
+    R3<4, 0, 1, 2, 3>( 3);
+    R3<3, 4, 0, 1, 2>( 4);
+    R3<2, 3, 4, 0, 1>( 5);
+    R3<1, 2, 3, 4, 0>( 6);
+    R3<0, 1, 2, 3, 4>( 7);
+    R3<4, 0, 1, 2, 3>( 8);
+    R3<3, 4, 0, 1, 2>( 9);
+    R3<2, 3, 4, 0, 1>(10);
+    R3<1, 2, 3, 4, 0>(11);
+    R4<0, 1, 2, 3, 4>(12);
+    R4<4, 0, 1, 2, 3>(13);
+    R4<3, 4, 0, 1, 2>(14);
+    R4<2, 3, 4, 0, 1>(15);
+    R4<1, 2, 3, 4, 0>( 0);
+    R4<0, 1, 2, 3, 4>( 1);
+    R4<4, 0, 1, 2, 3>( 2);
+    R4<3, 4, 0, 1, 2>( 3);
+    R4<2, 3, 4, 0, 1>( 4);
+    R4<1, 2, 3, 4, 0>( 5);
+    R4<0, 1, 2, 3, 4>( 6);
+    R4<4, 0, 1, 2, 3>( 7);
+    R4<3, 4, 0, 1, 2>( 8);
+    R4<2, 3, 4, 0, 1>( 9);
+    R4<1, 2, 3, 4, 0>(10);
+    R4<0, 1, 2, 3, 4>(11);
+    R4<4, 0, 1, 2, 3>(12);
+    R4<3, 4, 0, 1, 2>(13);
+    R4<2, 3, 4, 0, 1>(14);
+    R4<1, 2, 3, 4, 0>(15);
 
     /* Add the working vars back into m_digest[] */
     m_digest[0] += a;

@@ -51,6 +51,21 @@ target_link_libraries(
 
 #---------------------------------------------------------------------
 
+set(TEST demo_sha1)
+
+add_executable(
+	"${TEST}" 
+	demo_sha1.cpp
+)
+
+target_link_libraries(
+	"${TEST}"
+	PRIVATE
+	SHA1_lib
+)
+
+#---------------------------------------------------------------------
+
 # Create a 1GB size file for testing performance
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -60,7 +75,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		OUTPUT_VARIABLE output
 	)
 
-	add_compile_definitions(TEST_FILE="/tmp/1G_test_file.txt")
+	#add_compile_definitions(TEST_FILE="/tmp/1G_test_file.txt")
 endif()
 
 #---------------------------------------------------------------------

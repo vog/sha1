@@ -65,17 +65,3 @@ target_link_libraries(
 )
 
 #---------------------------------------------------------------------
-
-# Create a 1GB size file for testing performance
-
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	message("Creating a 1GB file of random data in /tmp directory...")
-	execute_process(COMMAND dd if=/dev/urandom of=/tmp/1G_test_file.txt bs=1G count=1 iflag=fullblock
-		ERROR_VARIABLE error
-		OUTPUT_VARIABLE output
-	)
-
-	#add_compile_definitions(TEST_FILE="/tmp/1G_test_file.txt")
-endif()
-
-#---------------------------------------------------------------------
